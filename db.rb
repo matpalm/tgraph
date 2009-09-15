@@ -8,12 +8,24 @@ class Db
 		@db.select_db('tgraph')
 	end
 
+	def init
+		@db.query('drop table seen;')
+		@db.query('create table seen (tid integer, last_checked timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP );')
+		@db.query('create index tid_index on seen(tid);')
+		@db.query('drop table friends;')
+		@db.query('create table friends (tid integer, friend integer);')
+		@db.query('create index tid_index on friends(tid);')
+		@db.query('drop table frontier;')
+		@db.query('create table frontier (id int primary key auto_increment,tid integer,depth integer,cost float,random integer,created_at timestamp DEFAULT CURRENT_TIMESTAMP);')
+		@db.query('insert into frontier (tid,depth,cost,random) values (1,0,0,1);')
+	end
+
 	def next_to_fetch
 		res = @db.query("select tid, depth, cost from frontier order by cost, random limit 1;")
-    row = res.fetch_row
-    to_ret = row[0].to_i, row[1].to_i, row[2].to_f
+		row = res.fetch_row
+		to_ret = row[0].to_i, row[1].to_i, row[2].to_f
 		res.free
-    to_ret
+		to_ret
 	end
 
 	def update_last_seen tid
