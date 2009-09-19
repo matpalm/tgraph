@@ -44,5 +44,9 @@ class WebCache
 			).fetch_xml
 	end
 
+	def invalidate_for id
+		`rm #{WEB_CACHE_DIR}/*#{id}*`
+	end
+
 end
 

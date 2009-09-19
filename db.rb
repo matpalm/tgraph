@@ -35,6 +35,8 @@ class Db
 	end
 
 	def update_last_seen tid, num_friends, name, screen_name
+		name.gsub! /'/,''
+		screen_name.gsub! /'/,''
 		@db.query("delete from users where tid=#{tid};")
 		@db.query("insert into users (tid, num_friends, name, screen_name) values (#{tid},#{num_friends},'#{name}','#{screen_name}');")
 	end

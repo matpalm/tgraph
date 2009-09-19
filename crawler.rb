@@ -30,18 +30,29 @@ class Crawler
 	end
 
 	def step
-		tid, depth, cost = @db.next_to_fetch
-		puts "step tid=#{tid} depth=#{depth} cost=#{cost}"
-		friends = friends_of tid
-		name, screen_name = user_info_of tid
-		@db.update_last_seen tid, friends.size, name, screen_name			
-		friend_cost = cost + 1 + friend_cost(friends.size)
-		friends.each do |friend|
-			@db.add_friend tid, friend
-			@db.add_to_frontier friend, depth+1, friend_cost unless @db.visited_before? friend
+		tid = nil
+		begin
+			puts Time.now
+			tid, depth, cost = @db.next_to_fetch
+			puts "step tid=#{tid} depth=#{depth} cost=#{cost}"
+			friends = friends_of tid
+			name, screen_name = user_info_of tid
+			@db.update_last_seen tid, friends.size, name, screen_name			
+			friend_cost = cost + 1 + friend_cost(friends.size)
+			friends.each do |friend|
+				@db.add_friend tid, friend
+				@db.add_to_frontier friend, depth+1, friend_cost unless @db.visited_before? friend
+			end
+			@db.remove_from_frontier tid
+			STDERR.flush
+			STDOUT.flush
+		rescue Exception => e		
+			@web_cache.invalidate_for tid
+			puts "ERROR #{e.inspect} #{e.m}"
+			STDERR.flush
+			STDOUT.flush
+			sleep 60
 		end
-		@db.remove_from_frontier tid
-		STDOUT.flush
 	end
 
 end
