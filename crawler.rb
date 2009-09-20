@@ -44,18 +44,16 @@ class Crawler
 				@db.add_to_frontier friend, depth+1, friend_cost unless @db.visited_before? friend
 			end
 			@db.remove_from_frontier tid
-			STDERR.flush
-			STDOUT.flush
 		rescue Exception => e		
-			@web_cache.invalidate_for tid
-			puts "ERROR #{e.inspect} #{e.m}"
-			STDERR.flush
-			STDOUT.flush
+			@web_cache.invalidate_for tid rescue puts "couldnt invalidate #{tid}"
+			puts "#{e.class} #{e.message} #{e.backtrace.inspect}"
 			sleep 60
 		end
 	end
 
 end
 
+STDERR.sync = true
+STDOUT.sync = true
 c = Crawler.new 
 c.step while true
