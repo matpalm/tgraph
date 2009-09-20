@@ -19,15 +19,14 @@ class Db
 		@db.query('create index tid_index on users(tid);')
 		@db.query('create table friends (tid integer, friend integer);')
 		@db.query('create index tid_index on friends(tid);')
-		@db.query('create table frontier (id int primary key auto_increment,tid integer,depth integer,cost float,random integer,created_at timestamp DEFAULT CURRENT_TIMESTAMP);')
+		@db.query('create table frontier (id int primary key auto_increment,tid integer,depth integer,cost float,created_at timestamp DEFAULT CURRENT_TIMESTAMP);')
 		@db.query('create index id_index on frontier(id);')
 		@db.query('create index cost_index on frontier(cost);')
-		@db.query('create index random_index on frontier(random);')
-		@db.query('insert into frontier (tid,depth,cost,random) values (26970530,0,0,1);')
+		@db.query('insert into frontier (tid,depth,cost) values (26970530,0,0);')
 	end
 
 	def next_to_fetch
-		res = @db.query("select tid, depth, cost from frontier order by cost, random limit 1;")
+		res = @db.query("select tid, depth, cost from frontier order by cost limit 1;")
 		row = res.fetch_row
 		to_ret = row[0].to_i, row[1].to_i, row[2].to_f
 		res.free
@@ -46,7 +45,7 @@ class Db
 	end
 
 	def add_to_frontier tid, depth, cost
-		@db.query("insert into frontier (tid,depth,cost,random) values (#{tid},#{depth},#{cost},#{tid.to_i%31415});")
+		@db.query("insert into frontier (tid,depth,cost) values (#{tid},#{depth},#{cost});")
 	end
 
 	def remove_from_frontier tid
