@@ -8,6 +8,14 @@ class Db
 		@db.select_db('tgraph')
 	end
 
+	def run_query query
+		start = Time.now
+		result = @db.query query
+		total = Time.now - start
+		puts "#{query} took #{total}"
+		result
+	end
+
 	def drop_tables
 		@db.query('drop table users;') rescue nil
 		@db.query('drop table friends;') rescue nil
@@ -26,7 +34,7 @@ class Db
 	end
 
 	def next_to_fetch
-		res = @db.query("select tid, depth, cost from frontier order by cost limit 1;")
+		res = run_query "select tid, depth, cost from frontier order by cost limit 1;"
 		row = res.fetch_row
 		to_ret = row[0].to_i, row[1].to_i, row[2].to_f
 		res.free
@@ -36,25 +44,20 @@ class Db
 	def update_last_seen tid, num_friends, name, screen_name
 		name.gsub! /'/,''
 		screen_name.gsub! /'/,''
-		@db.query("delete from users where tid=#{tid};")
-		@db.query("insert into users (tid, num_friends, name, screen_name) values (#{tid},#{num_friends},'#{name}','#{screen_name}');")
+		@db.query "delete from users where tid=#{tid};"
+		@db.query "insert into users (tid, num_friends, name, screen_name) values (#{tid},#{num_friends},'#{name}','#{screen_name}');"
 	end
 
 	def add_friend tid, friend
-		@db.query("insert into friends (tid,friend) values (#{tid},#{friend});")
+		@db.query "insert into friends (tid,friend) values (#{tid},#{friend});"
 	end
 
 	def add_to_frontier tid, depth, cost
-		@db.query("insert into frontier (tid,depth,cost) values (#{tid},#{depth},#{cost});")
+		@db.query "insert into frontier (tid,depth,cost) values (#{tid},#{depth},#{cost});"
 	end
 
 	def remove_from_frontier tid
-		@db.query("delete from frontier where tid=#{tid};")
-	end
-
-	def visited_before? tid
-		@db.query("select tid from users where tid=#{tid};")
-		@db.affected_rows == 1
+		run_query "delete from frontier where tid=#{tid};"
 	end
 
 end

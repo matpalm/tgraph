@@ -17,7 +17,7 @@ class TwitterInfo
 	def download_xml
 		puts "cache miss for #{@fetch_url}"
 		cmd = "curl -s #{@fetch_url} -o #{@cache_filename}"
-		puts cmd
+		#puts cmd
 		`#{cmd}`
 		sleep 30
 	end
