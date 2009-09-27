@@ -1,3 +1,6 @@
+require 'rubygems'
+require 'json'
+
 class User
 
 	def initialize tid, web_cache
@@ -24,10 +27,7 @@ class User
 	end
 
 	def friends
-		@friends ||= @web_cache.friends_of_xml(@tid).split.collect do |line|
-			line =~ /^<id>(.*)</
-			$1
-		end.compact
+		@friends ||= JSON.parse(@web_cache.friends_of_json(@tid))
 		@friends
 	end
 	
