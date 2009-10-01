@@ -89,5 +89,9 @@ class Db
 		return in_frontier
 	end
 
+	def bring_closer_on_frontier tid
+		@db.query "update frontier set cost=cost*0.99 where tid=#{tid}"
+	end
+
 end
 

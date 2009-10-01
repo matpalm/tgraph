@@ -28,6 +28,7 @@ class User
 
 	def friends
 		@friends ||= JSON.parse(@web_cache.friends_of_json(@tid))
+		@friends = [] if @friends.is_a?(Hash) && !@friends['error'].nil?
 		@friends
 	end
 	

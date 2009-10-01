@@ -27,22 +27,23 @@ class Crawler
 				user_seen_before = already_on_frontier = 0
 				friends.each do |friend|
 					#@db.add_friend tid, friend
-					if @user_ids.include?(friend)
+					if @user_ids.include? friend
 						user_seen_before += 1
-					elsif @db.in_frontier?(friend)
+					elsif @db.in_frontier? friend
 						already_on_frontier  += 1
+						#@db.bring_closer_on_frontier friend ; this doesnt work since it introduced people with many followers who then follow heaps of people and cascades
 					else	
 						@db.add_to_frontier friend, depth+1, friend_cost
 					end
 				end
-				puts "user #{user.name} added #{friends.size} friends; user_seen_before=#{user_seen_before} already_on_frontier=#{already_on_frontier}"
+				puts "user #{user.name} has #{friends.size} friends; user_seen_before=#{user_seen_before} already_on_frontier=#{already_on_frontier}, new_for_frontier=#{friends.size-user_seen_before-already_on_frontier}"
 			else
 				puts "ignoring what appears to be an invalid user #{tid}"
 			end
 		rescue Exception => e		
 #			@web_cache.invalidate_for tid rescue puts "couldnt invalidate #{tid}"
 			puts "#{e.class} #{e.message} #{e.backtrace.inspect}"
-			sleep 60
+			sleep 10
 		end
 		@db.remove_from_frontier tid 
 		puts "#{@db.count_of('users')} users; #{@db.count_of('frontier')} in frontier"
