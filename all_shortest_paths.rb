@@ -2,13 +2,23 @@
 require 'set'
 require 'node'
 
+class Node
+
+	attr_accessor :found_shortest, :visited
+
+	def reset
+		@found_shortest = @visited = false
+	end
+
+end
+
 class AllShortestPaths
 
 	def initialize nodes
 		@nodes = nodes
 	end
 		
-	def output_dot
+	def output_dot # move to Node
 		dot = File.open("test.dot","w")
 		dot.puts "digraph {"
 		@nodes.each do |node|
@@ -26,7 +36,10 @@ class AllShortestPaths
 	def all_shortest_paths
 		@shortest_path_edges = {}
 		@shortest_path_edges.default = 0
-		@nodes.each { |k| shortest_path_from k }
+		@nodes.each do |k|
+			@nodes.each { |n| n.reset }
+			shortest_path_from k 
+		end
 	end
 
 	def shortest_path_from start_node
@@ -35,20 +48,18 @@ class AllShortestPaths
 		queue = []
 		queue << start_node
 
-		visited = Set.new
-		shortest_found = Set.new
-		shortest_found << start_node
+		start_node.found_shortest = true
 
 		while !queue.empty?
 			node = queue.shift
-			visited << node
+			node.visited = true
 #			next unless node.neighbours.include? node
 			node.neighbours.each do |neighbour|
-				if !(shortest_found.include? neighbour)
+				if !neighbour.found_shortest
 					@shortest_path_edges[[node, neighbour]] += 1
-					shortest_found << neighbour
+					neighbour.found_shortest = true
 				end
-				queue << neighbour unless visited.include?(neighbour) || queue.include?(neighbour)
+				queue << neighbour unless neighbour.visited || queue.include?(neighbour)
 			end
 		end
 		

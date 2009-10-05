@@ -3,6 +3,10 @@
 
 require 'node'
 
+class Node
+	attr_accessor :index, :low_link
+end
+
 class Tarjan
 
 	def initialize nodes
@@ -49,7 +53,7 @@ class Tarjan
 
 end
 
-nodes = hash_to_nodes({ 
+nodes = Node.hash_to_nodes({ 
  'a'=> ['b','c'], 'b' => ['a', 'c'], 'c' => ['a','b','d'],
  'd' => ['e','f'], 'e' => ['d','f'], 'f' => ['d','e'] 
 })
