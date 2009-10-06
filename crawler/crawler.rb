@@ -51,6 +51,8 @@ class Crawler
 
 end
 
+puts "NOTE: no UID_PWD set so having to use rate limited api (set as uid:pwd)" unless ENV['UID_PWD']
+
 #Db.new.reinit
 STDERR.sync = true
 STDOUT.sync = true

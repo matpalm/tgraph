@@ -1,5 +1,6 @@
 require 'json'
 require 'date'
+require 'curl'
 
 class RateLimiter
 
@@ -20,10 +21,18 @@ class RateLimiter
 	end
 
 	def recheck_with_twitter
-		json = `curl -s http://twitter.com/account/rate_limit_status.json`
-		limit_info = JSON.parse(json)		
-		@allowed = limit_info['remaining_hits']
-		@reset_time = DateTime.parse limit_info['reset_time']
+		while true
+			begin
+				json = curl 'http://twitter.com/account/rate_limit_status.json'
+				limit_info = JSON.parse(json)		
+				@allowed = limit_info['remaining_hits']
+				@reset_time = DateTime.parse limit_info['reset_time']
+				return
+			rescue
+				puts "RATELIMIT: problem checking rate limit?? #{Time.now}"
+				sleep 60
+			end
+		end
 	end
 
 	def block_until_reset_time

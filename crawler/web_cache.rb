@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'curl'
 
 WEB_CACHE_DIR = 'cache'
 HASH_BUCKETS = 20
@@ -19,10 +20,7 @@ class TwitterInfo
 	def download
 		puts "cache miss for #{@fetch_url}"		
 		@rate_limiter.checkpoint
-		cmd = "curl -s #{@fetch_url} -o #{@cache_filename}"
-		puts cmd
-		`#{cmd}`
-		#sleep 30
+		curl @fetch_url, @cache_filename
 	end
 
 end
