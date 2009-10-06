@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'set'
 require 'node'
+require 'graph'
 
 class Node
 
@@ -17,8 +18,24 @@ class AllShortestPaths
 	def initialize nodes
 		@nodes = nodes
 	end
+	
+	def most_travelled
+		max_value = 0
+		max_edge = []
+		@shortest_path_edges.each do |k,v|
+			if v == max_value
+				max_edge << k
+			elsif v > max_value
+				max_value = v
+				max_edge = [k]
+			end
+		end
+		edge_ids = max_edge.collect { |pair| [pair.first.id, pair.last.id] }
+		puts "max_edge #{edge_ids.inspect}"
+		edge_ids
+	end
 		
-	def output_dot # move to Node
+	def output_dot
 		dot = File.open("test.dot","w")
 		dot.puts "digraph {"
 		@nodes.each do |node|
@@ -43,17 +60,12 @@ class AllShortestPaths
 	end
 
 	def shortest_path_from start_node
-		backtrack = {}
-
 		queue = []
 		queue << start_node
-
 		start_node.found_shortest = true
-
 		while !queue.empty?
 			node = queue.shift
 			node.visited = true
-#			next unless node.neighbours.include? node
 			node.neighbours.each do |neighbour|
 				if !neighbour.found_shortest
 					@shortest_path_edges[[node, neighbour]] += 1
@@ -62,7 +74,6 @@ class AllShortestPaths
 				queue << neighbour unless neighbour.visited || queue.include?(neighbour)
 			end
 		end
-		
 	end
 
 end
@@ -70,12 +81,21 @@ end
 raise "all_shortest_paths.rb <EDGES>" unless ARGV.length==1
 EDGES_FILE = ARGV[0]
 
-nodes = Node.hash_to_nodes_from_file EDGES_FILE
-#puts neighbours.inspect
+graph = Graph.hash_to_nodes_from_file EDGES_FILE
 
-asp = AllShortestPaths.new nodes
+graph.dump
+asp = AllShortestPaths.new graph.nodes
 asp.all_shortest_paths
-asp.output_dot
+betweenness_edges = asp.most_travelled
+graph.remove_edges betweenness_edges
+
+graph.dump
+asp = AllShortestPaths.new graph.nodes
+asp.all_shortest_paths
+betweenness_edges = asp.most_travelled
+#graph.remove_edges betweenness_edges
+
+#asp.output_dot
 
 # barplot(sort(table(scan("passes"))))
 

@@ -2,6 +2,7 @@
 # tarjans strongly connected components algorithm
 
 require 'node'
+require 'graph'
 
 class Node
 	attr_accessor :index, :low_link
@@ -53,10 +54,10 @@ class Tarjan
 
 end
 
-nodes = Node.hash_to_nodes({ 
+nodes = Graph.hash_to_nodes({ 
  'a'=> ['b','c'], 'b' => ['a', 'c'], 'c' => ['a','b','d'],
  'd' => ['e','f'], 'e' => ['d','f'], 'f' => ['d','e'] 
-})
+}).nodes
 #nodes = hash_to_nodes({ 'a'=> ['b'], 'b' => ['a']})#, 'c' => ['d'], 'd' => ['c'] })
 Tarjan.new(nodes).run
 
