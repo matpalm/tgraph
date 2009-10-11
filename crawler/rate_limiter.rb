@@ -17,7 +17,7 @@ class RateLimiter
 			block_until_reset_time
 			@recheck_required = true
 			checkpoint
-		end
+		end 
 	end
 
 	def recheck_with_twitter
