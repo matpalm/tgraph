@@ -8,7 +8,7 @@ class Graph
 		@nodes.values
 	end
 
-	def self.hash_to_nodes_from_file filename
+	def self.nodes_from_file filename
 		nodes_hash = {}
 		File.open(filename).each do |edge|
 			from,to = edge.strip.split("\t")
@@ -29,7 +29,7 @@ class Graph
 			node.neighbours = neighbours_key.collect {|ns| nodes_key_to_node[ns]}
 			nodes[node_key] = node
 		end
-		Graph.new nodes
+		Graph.new nodes.values
 	end
 
 	# edges = [ ['a','b'], ['a',e'], ['b','d'] ]
@@ -41,10 +41,14 @@ class Graph
 		end
 	end
 
-	def dump
-		@nodes.each do |key,node|
-			puts "#{key} #{node.neighbours.collect{|n| n.id}.inspect}"
-		end
+	def single_node?
+		@nodes.size == 1
+	end
+
+	def dump		
+		@nodes.collect do |node|
+			"#{node.id} => #{node.neighbours.collect{|n| n.id}.inspect}"
+		end.join ', '
 	end
 
 end
