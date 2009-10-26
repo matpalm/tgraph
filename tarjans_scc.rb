@@ -9,11 +9,14 @@ class Node
 end
 
 class Tarjan
+	attr_reader :sub_graphs
 
 	def initialize nodes
 		@nodes = nodes
+		@nodes.each { |n| n.index = n.low_link = nil }
 		@index = 0
 		@stack = []
+		@sub_graphs = []
 	end
 	
 	def min a, b
@@ -24,6 +27,7 @@ class Tarjan
 		@nodes.each do |node|
 			tarjan(node) if node.index.nil?
 		end
+		@sub_graphs
 	end
 	
 	def tarjan node
@@ -41,10 +45,11 @@ class Tarjan
 		if node.low_link == node.index
 			scc = []
 			while(@stack.first != node)
-				scc << @stack.shift.id
+				scc << @stack.shift
 			end
-			scc << @stack.shift.id
-			puts "SCC #{scc.inspect}"
+			scc << @stack.shift
+			puts "SCC #{scc.collect{|n| n.id}.inspect}"
+			@sub_graphs << scc
 		end
 	end
 
@@ -54,10 +59,12 @@ class Tarjan
 
 end
 
+=begin
 nodes = Graph.hash_to_nodes({ 
  'a'=> ['b','c'], 'b' => ['a', 'c'], 'c' => ['a','b','d'],
  'd' => ['e','f'], 'e' => ['d','f'], 'f' => ['d','e'] 
 }).nodes
 #nodes = hash_to_nodes({ 'a'=> ['b'], 'b' => ['a']})#, 'c' => ['d'], 'd' => ['c'] })
 Tarjan.new(nodes).run
+=end
 

@@ -9,7 +9,7 @@ class RateLimiter
 	end
 
 	def checkpoint
-		recheck_with_twitter if @recheck_required
+		recheck_with_twitter if @recheck_required		
 		if @allowed > 0
 			@allowed -=1
 			puts "RATELIMIT: allowed now #{@allowed}"
@@ -17,16 +17,18 @@ class RateLimiter
 			block_until_reset_time
 			@recheck_required = true
 			checkpoint
-		end 
+		end
 	end
 
 	def recheck_with_twitter
+		puts "RATELIMIT: recheck_with_twitter"
 		while true
 			begin
 				json = curl 'http://twitter.com/account/rate_limit_status.json'
 				limit_info = JSON.parse(json)		
 				@allowed = limit_info['remaining_hits']
-				@reset_time = DateTime.parse limit_info['reset_time']
+				@reset_time = DateTime.parse limit_info['reset_time']				
+				@recheck_required = false
 				return
 			rescue
 				puts "RATELIMIT: problem checking rate limit?? #{Time.now}"

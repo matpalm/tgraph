@@ -4,37 +4,16 @@ require 'node'
 require 'graph'
 
 class Node
-
 	attr_accessor :found_shortest, :visited
-
-	def reset
-		@found_shortest = @visited = false
-	end
-
 end
 
 class AllShortestPaths
 
 	def initialize nodes
 		@nodes = nodes
+		@nodes.each { |n| n.found_shortest = n.visited = false }
 	end
-	
-	def most_travelled
-		max_value = 0
-		max_edge = []
-		@shortest_path_edges.each do |k,v|
-			if v == max_value
-				max_edge << k
-			elsif v > max_value
-				max_value = v
-				max_edge = [k]
-			end
-		end
-		edge_ids = max_edge.collect { |pair| [pair.first.id, pair.last.id] }
-		puts "max_edge #{edge_ids.inspect}"
-		edge_ids
-	end
-		
+			
 	def output_dot
 		dot = File.open("test.dot","w")
 		dot.puts "digraph {"
@@ -50,13 +29,13 @@ class AllShortestPaths
 		dot.close
 	end
 
-	def all_shortest_paths
+	def run
 		@shortest_path_edges = {}
 		@shortest_path_edges.default = 0
 		@nodes.each do |k|
-			@nodes.each { |n| n.reset }
 			shortest_path_from k 
 		end
+		most_travelled
 	end
 
 	def shortest_path_from start_node
@@ -76,26 +55,23 @@ class AllShortestPaths
 		end
 	end
 
+	def most_travelled
+		max_value = 0
+		max_edge = []
+		@shortest_path_edges.each do |k,v|
+#			puts "#{k.first.id} #{k.last.id} #{v}"
+			if v == max_value
+				max_edge << k
+			elsif v > max_value
+				max_value = v
+				max_edge = [k]
+			end
+		end
+		edge_ids = max_edge.collect { |pair| [pair.first.id, pair.last.id] }
+		puts "max_edge #{edge_ids.inspect}"
+		edge_ids
+	end
+
 end
 
-raise "all_shortest_paths.rb <EDGES>" unless ARGV.length==1
-EDGES_FILE = ARGV[0]
-
-graph = Graph.hash_to_nodes_from_file EDGES_FILE
-
-graph.dump
-asp = AllShortestPaths.new graph.nodes
-asp.all_shortest_paths
-betweenness_edges = asp.most_travelled
-graph.remove_edges betweenness_edges
-
-graph.dump
-asp = AllShortestPaths.new graph.nodes
-asp.all_shortest_paths
-betweenness_edges = asp.most_travelled
-#graph.remove_edges betweenness_edges
-
-#asp.output_dot
-
-# barplot(sort(table(scan("passes"))))
 
