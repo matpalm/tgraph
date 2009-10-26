@@ -1,0 +1,5 @@
+mysql tgraph < slurp.sql | grep -v tids > ids
+mkdir beanstalk_binlog
+beanstalkd -b beanstalk_binlog
+ruby fetcher.rb 5
+ruby main.rb ids_to_fetch log_file_for_queued_ids
