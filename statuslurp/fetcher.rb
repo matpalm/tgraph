@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rubygems'
 require 'beanstalk-client'
 require 'curl'
@@ -7,6 +9,7 @@ class Fetcher
 	def initialize tweet_out		
 		@tweet_out = File.new(tweet_out,'a')
 		@tweet_out.sync = true
+		puts "FETCHER: writing to #{tweet_out}"
 	end
 
 	def run
@@ -29,7 +32,8 @@ class Fetcher
 end
 
 raise "usage: fetcher.rb NUM_FETCHERS" unless ARGV.length==1
-ARGV.first.to_i.times do |i|
-	fork { Fetcher.new("fetcher.#{i}.json").run }
+start = Time.now.to_i
+ARGV.first.to_i.times do
+	fork { Fetcher.new("fetcher.#{start}.#{$$}.json").run }
 end
 Process.waitall
