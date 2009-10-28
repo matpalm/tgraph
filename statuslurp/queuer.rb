@@ -17,6 +17,7 @@ class Queuer
 
 	def run
 		while true
+			block_until_beanstalk_queue_done
 			ping_twitter
 			@remaining_hits.times do
 				next_id = STDIN.readline.chomp			
@@ -24,7 +25,6 @@ class Queuer
 				@ids_queued.puts next_id	
 			end
 			block_until_twitter_reset_time
-			block_until_beanstalk_queue_done
 		end
 	end
 
@@ -55,10 +55,9 @@ class Queuer
 	end
 
 	def block_until_beanstalk_queue_done
-		log ">block_until_beanstalk_queue_done"
+		log ">block_until_beanstalk_queue_done; todo current #{@beanstalk.stats['current-jobs-ready']}"
 		while true do
 			todo = @beanstalk.stats['current-jobs-ready']
-			log "beanstalk queue #todo=#{todo}"
 			return if todo==0
 			sleep 5
 		end

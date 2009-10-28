@@ -1,5 +1,1 @@
 mysql tgraph < slurp.sql | grep -v tids > ids
-mkdir beanstalk_binlog
-beanstalkd -b beanstalk_binlog
-ruby fetcher.rb 5
-cat ids | ruby main.rb 

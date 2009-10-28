@@ -31,6 +31,7 @@ class Fetcher
 
 end
 
+raise "no UID_PWD set" unless ENV['UID_PWD']
 raise "usage: fetcher.rb NUM_FETCHERS" unless ARGV.length==1
 start = Time.now.to_i
 ARGV.first.to_i.times do
