@@ -15,32 +15,45 @@ require 'tarjans_scc'
 raise "decompose.rb <EDGES>" unless ARGV.length==1
 EDGES_FILE = ARGV[0]
 
-graph = Graph.nodes_from_file EDGES_FILE
-puts "GR #{graph.class}"
-puts graph.dump
-graphs = Tarjan.new(graph.nodes).run
-puts "GR #{graphs.first.class}"
+# dilemma: tarjan and allshortestpath want 'graph' representation
+# just as a list of nodes. graph itself want's a graph as a hash
+#
+graph = Graph::nodes_from_stream File.open(EDGES_FILE)
+#puts "GR #{graph.first.class}"
+#puts graph.dump
+graphs = Tarjan.new(graph).run
+puts "GR #{graphs.collect{|g| g.class}.inspect}"
 
 10.times do |n|
 	puts "ITERATION #{n}"
 	next_graphs = []
-	graphs.each do |g|
-		puts "g=#{g}"
-		if g.single_node?
+	graphs.each do |graph|
+		puts "graph=#{graph.class}"
+		if graph.size==1
 			puts "single node, pass along"
-			next_graphs << g
+			next_graphs << graph
 		else
-			puts "sub graph #{graph.dump}"
-			betweenness_edges = AllShortestPaths.new(graph.nodes).run
+			puts "sub graph #{graph.size} nodes"
+			betweenness_edges = AllShortestPaths.new(graph).run
 			edge_to_remove = betweenness_edges.random_elem
-			puts "removing #{edge_to_remove.inspect}"
+			puts "removing edge #{edge_to_remove.inspect}"
 			graph.remove_edges [edge_to_remove]
-			puts graph.dump
-			sub_graphs = Tarjan.new(graph.nodes).run
+			sub_graphs = Tarjan.new(graph).run
 			next_graphs += sub_graphs
 		end
 	end
 	graphs = next_graphs
+
+	# bling
+	puts ">>next_graphs"
+	graphs.each do |graph|
+		puts "\t>>graph"
+		graph.sort! {|a,b| a.id <=> b.id }
+		graph.each do |node|
+			puts "\t\tNODE #{node.to_s}"
+		end
+	end
+	puts "<<next_graphs"
 end
 
 #asp = AllShortestPaths.new graph.nodes

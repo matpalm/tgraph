@@ -1,16 +1,8 @@
-class Graph
+module Graph
 
-	def initialize nodes
-		@nodes = nodes
-	end
-
-	def nodes
-		@nodes.values
-	end
-
-	def self.nodes_from_file filename
+	def self.nodes_from_stream stream
 		nodes_hash = {}
-		File.open(filename).each do |edge|
+		stream.each do |edge|
 			from,to = edge.strip.split("\t")
 			nodes_hash[from] ||= []
 			nodes_hash[from] << to	
@@ -29,26 +21,25 @@ class Graph
 			node.neighbours = neighbours_key.collect {|ns| nodes_key_to_node[ns]}
 			nodes[node_key] = node
 		end
-		Graph.new nodes.values
+		nodes.values.each { |n| puts n }
+		nodes.values
 	end
+
+end
+
+class Array
 
 	# edges = [ ['a','b'], ['a',e'], ['b','d'] ]
   # removed neighbours b and e from a and d from b
 	def remove_edges edges
-		edges.each do |edge|
-			from,to = edge
-			@nodes[from].remove_neighbour @nodes[to]
-		end
+		edges.each { |edge| remove_edge edge } 
 	end
 
-	def single_node?
-		@nodes.size == 1
-	end
-
-	def dump		
-		@nodes.collect do |node|
-			"#{node.id} => #{node.neighbours.collect{|n| n.id}.inspect}"
-		end.join ', '
+	def remove_edge edge
+		from_id, to_id = edge
+		from = find {|n| n.id==from_id }
+		to = find {|n| n.id==to_id }
+		from.remove_neighbour to
 	end
 
 end

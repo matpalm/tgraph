@@ -14,5 +14,9 @@ class Node
 		@neighbours -= [to]
 	end
 
+	def to_s
+		"id=#{id} neighbours=#{neighbours.collect{|n|n.id}.inspect}"
+	end
+
 end
 
