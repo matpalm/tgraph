@@ -1,0 +1,12 @@
+page_rank = load '$input' as (node:chararray, rank:float);
+node_contribs = load 'node_contribs' as (node:chararray, contrib:double);
+nodes_page_rank = join node_contribs by node, page_rank by node;
+contribs = foreach nodes_page_rank generate node_contribs::node, (double)node_contribs::contrib*(double)page_rank::rank as contrib; 
+edges = load 'edges' as (from:chararray, to:chararray);
+joined_divy_groups = join edges by from, contribs by node_contribs::node;
+page_rank_contributions = foreach joined_divy_groups generate edges::to, contribs::contrib;
+zero_contribs = load 'zero_contribs' as (node:chararray, contrib:double);
+page_rank_contributions_with_zero = union page_rank_contributions, zero_contribs;
+group_page_ranks = group page_rank_contributions_with_zero by edges::to;
+next_page_rank = foreach group_page_ranks generate group, 0.15+(0.85*SUM(page_rank_contributions_with_zero.contribs::contrib)); 
+store next_page_rank into '$output';
