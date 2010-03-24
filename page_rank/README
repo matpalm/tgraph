@@ -1,0 +1,168 @@
+
+explained further in matpalm.com/tag/e10
+
+this just a vanilla impl of page rank 
+what i want to do is modify it to take into account the special
+nature of the frontier for a twitter crawl. nodes on the frontier
+are an interesting case in that we dont know all their in/out nodes but
+we do know they in/out degree. we can in theory introduce pseudo nodes to act
+as sources and sinks. outbound nodes can be sinks and we can collect the
+amount of output 'lost' this could be then redistributed as sources
+to inbound nodes. (maybe???)
+
+e10.5 page rank implementation in pig
+
+the ruby code for this is pretty straight forward,
+
+but how does it look in map reduce? in particular, for this learning experiment,
+how does it look in the data flow query language pig?
+
+we start with two types of data
+
+1) the graph connectivity in a file called nodes (ignoring the nodes will no outdegree)
+
+a  b
+a  c
+b  c
+b  d
+c  d
+
+2) the page ranks in a file called pr
+
+a  1
+b  1
+c  1
+d  1
+
+first we load the node data and page rank data
+
+grunt> edges = load 'edges' as (from:chararray, to:chararray);
+grunt> dump edges;
+(a,b)
+(a,c)
+(b,c)
+(b,d)
+(c,d)
+
+and group them
+
+grunt> nodes = group edges by from;
+grunt> dump nodes;
+(a,{(a,b),(a,c)})
+(b,{(b,c),(b,d)})
+(c,{(c,d)})
+
+grunt> node_contrib = foreach nodes generate group, 1.0 / (double)SIZE(edges) as contrib;
+(a,0.5)
+(b,0.5)
+(c,1.0)
+
+grunt> zero_contribs = foreach nodes generate group, (double)0 as contrib;
+grunt> dump zero_contribs;
+(a,0.0)
+(b,0.0)
+(c,0.0)
+
+can save this off for later!
+
+grunt> page_rank = load 'pr' as (node:chararray, rank:float);
+grunt> dump page_rank;
+(a,1.0F)
+(b,1.0F)
+(c,1.0F)
+(d,1.0F)
+
+we join the grouped nodes with the  on node id
+
+grunt> nodes_page_rank = join node_contrib by group, page_rank by node;
+grunt> dump nodes_page_rank:
+(a,0.5,a,1.0F)
+(b,0.5,b,1.0F)
+(c,1.0,c,1.0F)
+
+grunt> contribs = foreach nodes_page_rank generate node_contrib::group, (double)node_contrib::contrib*(double)page_rank::rank as contrib; 
+grunt> dump contribs
+(a,0.5)
+(b,0.5)
+(c,1.0)
+
+grunt> joined_divy_groups = join edges by from, contribs by node_contrib::group;
+grunt> dump joined_divy_groups;
+(a,b,a,0.5)
+(a,c,a,0.5)
+(b,c,b,0.5)
+(b,d,b,0.5)
+(c,d,c,1.0)
+
+grunt> page_rank_contributions = foreach joined_divy_groups generate edges::to, contribs::contrib;
+grunt> dump page_rank_contributions
+(b,0.5)
+(c,0.5)
+(c,0.5)
+(d,0.5)
+(d,1.0)
+
+grunt> page_rank_contributions_with_zero = union page_rank_contributions, zero_contribs;
+grunt> dump page_rank_contributions_with_zero;
+(b,0.5)
+(a,0.0)
+(c,0.5)
+(b,0.0)
+(c,0.5)
+(c,0.0)
+(d,0.5)
+(d,1.0)
+
+grunt> group_page_ranks = group page_rank_contributions_with_zero by edges::to;
+grunt> dump group_page_ranks;
+(a,{(a,0.0)})
+(b,{(b,0.5),(b,0.0)})
+(c,{(c,0.5),(c,0.5),(c,0.0)})
+(d,{(d,0.5),(d,1.0)})
+
+grunt> next_page_rank = foreach group_page_ranks generate group, 0.15+(0.85*SUM(page_rank_contributions_with_zero.contribs::contrib)); 
+grunt> dump next_page_rank;
+(a,0.15)
+(b,0.575)
+(c,1.0)
+(d,1.425)
+
+awesome!
+
+we can then combine these all into two pig files
+
+the first we only need to run once; page_rank_preprocess.pig
+edges = load 'edges' as (from:chararray, to:chararray);
+nodes = group edges by from;
+node_contribs = foreach nodes generate group, 1.0 / (double)SIZE(edges) as contrib;
+store node_contribs into 'node_contribs';
+zero_contribs = foreach nodes generate group, (double)0 as contrib;
+store zero_contribs into 'zero_contribs';
+
+then run many times; page_rank.pig
+page_rank = load '$input' as (node:chararray, rank:float);
+node_contribs = load 'node_contribs' as (node:chararray, contrib:double);
+nodes_page_rank = join node_contribs by node, page_rank by node;
+contribs = foreach nodes_page_rank generate node_contribs::node, (double)node_contribs::contrib*(double)page_rank::rank as contrib; 
+edges = load 'edges' as (from:chararray, to:chararray);
+joined_divy_groups = join edges by from, contribs by node_contribs::node;
+page_rank_contributions = foreach joined_divy_groups generate edges::to, contribs::contrib;
+zero_contribs = load 'zero_contribs' as (node:chararray, contrib:double);
+page_rank_contributions_with_zero = union page_rank_contributions, zero_contribs;
+group_page_ranks = group page_rank_contributions_with_zero by edges::to;
+next_page_rank = foreach group_page_ranks generate group, 0.15+(0.85*SUM(page_rank_contributions_with_zero.contribs::contrib)); 
+store next_page_rank into '$output';
+
+and run it a number of times
+bash> pig -x local page_rank_preprocess.pig
+bash> pig -x local -param input=pr -param output=pr2 page_rank.pig
+bash> pig -x local -param input=pr2 -param output=pr3 page_rank.pig
+bash> pig -x local -param input=pr3 -param output=pr4 page_rank.pig
+bash> pig -x local -param input=pr4 -param output=pr5 page_rank.pig
+bash> pig -x local -param input=pr5 -param output=pr6 page_rank.pig
+bash> cat pr6
+a	0.15
+b	0.2137500025331974
+c	0.30459375455975535
+d	0.499748432636261
+
