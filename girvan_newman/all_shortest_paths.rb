@@ -10,8 +10,8 @@ end
 class AllShortestPaths
 
 	def initialize nodes
-		@nodes = nodes
-		@nodes.each { |n| n.found_shortest = n.visited = false }
+		@nodes = nodes		
+		reset_all_nodes	
 	end
 			
 	def output_dot
@@ -29,16 +29,19 @@ class AllShortestPaths
 		dot.close
 	end
 
+	def reset_all_nodes
+		@nodes.each { |n| n.found_shortest = n.visited = false }
+	end
+
 	def run
-		@shortest_path_edges = {}
-		@shortest_path_edges.default = 0
-		@nodes.each do |k|
-			shortest_path_from k 
+		@shortest_path_edges = Hash.new 0
+		@nodes.each do |node| 
+			calc_shortest_path_from node 
 		end
 		most_travelled
 	end
 
-	def shortest_path_from start_node
+	def calc_shortest_path_from start_node
 		queue = []
 		queue << start_node
 		start_node.found_shortest = true
@@ -59,7 +62,7 @@ class AllShortestPaths
 		max_value = 0
 		max_edge = []
 		@shortest_path_edges.each do |k,v|
-#			puts "#{k.first.id} #{k.last.id} #{v}"
+#			puts "shortest path edge: #{k.first.id} #{k.last.id} #{v}"
 			if v == max_value
 				max_edge << k
 			elsif v > max_value

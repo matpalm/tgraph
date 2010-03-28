@@ -11,7 +11,7 @@ class Node
 	end
 
 	def remove_neighbour to
-		@neighbours -= [to]
+		@neighbours.delete to
 	end
 
 	def to_s

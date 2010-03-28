@@ -11,6 +11,7 @@ end
 
 require 'all_shortest_paths'
 require 'tarjans_scc'
+require 'core_extensions'
 
 raise "decompose.rb <EDGES>" unless ARGV.length==1
 EDGES_FILE = ARGV[0]
@@ -35,10 +36,15 @@ puts "GR #{graphs.collect{|g| g.class}.inspect}"
 		else
 			puts "sub graph #{graph.size} nodes"
 			betweenness_edges = AllShortestPaths.new(graph).run
-			edge_to_remove = betweenness_edges.random_elem
-			puts "removing edge #{edge_to_remove.inspect}"
-			graph.remove_edges [edge_to_remove]
-			sub_graphs = Tarjan.new(graph).run
+			betweenness_edges.each do |candidate_edge_to_remove|
+				puts "trialing removal of edge #{candidate_edge_to_remove}"
+				graph.remove_edge candidate_edge_to_remove
+				sub_graphs = Tarjan.new(graph).run
+				sub_graph_sizes = sub_graphs.collect {|sg| sg.size}
+				puts "sub_graph_sizes = #{sub_graph_sizes.inspect}"
+				exit 0
+			end
+			
 			next_graphs += sub_graphs
 		end
 	end
