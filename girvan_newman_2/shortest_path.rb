@@ -1,15 +1,18 @@
+MaximalEdges = Struct.new :edges, :freq
+
 module RGL
 	class AdjacencyGraph
 		
-		def maximal_between_edge
-			maximal_edge = nil
-			maximal_edge_freq = -1 # bootstrap
+		def maximal_between_edges
+			max_edges = []
+			max_freq = -1 # bootstrap
+			puts "edge_betweeness=#{edge_betweeness.inspect}"
 			edge_betweeness.each do |edge, freq|
-				next unless freq > maximal_edge_freq
-				maximal_edge = edge
-				maximal_edge_freq = freq
+				next unless freq >= max_freq
+				max_edges << edge
+				max_freq = freq
 			end
-			maximal_edge
+			MaximalEdges.new max_edges, max_freq
 		end
 
 		def edge_betweeness
