@@ -9,9 +9,10 @@ require 'parse'
 require 'solutions'
 
 initial_graph = parse_from_stdin
+puts "PARTITIONS #{[initial_graph.vertices.sort].inspect}"
 graphs = initial_graph.break_into_connected_components
 
-3.times do |i|
+100.times do |i|
   puts "iter #{i}"
 
   candidate_solutions = Solutions.new
@@ -38,9 +39,11 @@ graphs = initial_graph.break_into_connected_components
     graphs.each { |g| puts g }
     exit 0
   end
+ 
 
-  puts "final"
-  graphs.each { |g| puts g.vertices.inspect }
+  partitions = graphs.collect { |g| g.vertices.sort }
+  partitions.sort! { |a,b| a.first <=> b.first }
+  puts "PARTITIONS #{partitions.inspect}"
 
 end
 

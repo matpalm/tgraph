@@ -1,5 +1,14 @@
-when more than one partition only remove one edge per iteration, not one per subgraph
-this only matters if you want an accurate dendogram
+to draw graph of original graph
+bash> cat p97.edges | ./dotify.rb | neato -Tpng > p97.png
+
+to decompose
+bash> decompose.rb < p97.edges | grep ^PART
+
+to visualise decomposition
+bash> R --vanilla < dendro.r # hard coded to result of p97 for the time being
+
+
+TODOS
 
 stocastic g-n (p98) using a few random points to calc betweenness rather than all vertices
 have to run a number of times but each time is a vote towards what community so is
