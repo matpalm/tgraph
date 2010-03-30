@@ -47,12 +47,14 @@ module RGL
       visited = Set.new
       shortest_path_found = Set.new
       todo = [ vertex1 ]
+      #puts "shortestpath from #{vertex1}"
       while not todo.empty? do
         #puts "\ntodo = #{todo.inspect}"
         #puts "visited = #{visited.inspect}"
         #puts "shortest_path_found = #{shortest_path_found.inspect}"
         
-        vertex1 = todo.shift
+        vertex1 = todo.shuffle.first
+        todo.delete vertex1
         #puts "visiting #{vertex1}"
         
         visited << vertex1
@@ -60,11 +62,11 @@ module RGL
         
         neighbours = adjacent_vertices vertex1
         #puts "neighbours=#{neighbours.inspect}"
-        neighbours.each do |vertex2|
+        neighbours.shuffle.each do |vertex2|
           next if shortest_path_found.include? vertex2
           e = edge_for vertex1, vertex2
           edges << e
-          #puts "edge #{e.inspect}"
+          #puts "shortestpath edge #{e.inspect}"
           shortest_path_found << vertex2
           todo << vertex2 unless visited.include? vertex2
         end
