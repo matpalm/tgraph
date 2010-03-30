@@ -14,4 +14,7 @@ a$height <- c(1, 1, 1, 1, 1, 2, 4, 5, 7, 10, 11)
 a$order <- 1:12
 a$labels <- 1:12 # LETTERS[1:6]
 class(a) <- "hclust"
+
+jpeg("p97.dendrogram.jpg", width = 400, height = 400)
 plot(as.dendrogram(a))
+dev.off()
