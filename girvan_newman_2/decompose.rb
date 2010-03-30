@@ -2,39 +2,51 @@
 require 'rubygems'
 require 'rgl/adjacency'
 require 'rgl/connected_components'
-require 'parse'
 require 'edge_betweeness'
+require 'connected_components_extensions'
 require 'core_extensions'
-require 'graph_extensions'
+require 'parse'
 require 'solutions'
 
-g = parse_from_stdin
+initial_graph = parse_from_stdin
+graphs = initial_graph.break_into_connected_components
 
-5.times do |i|
-  
-  puts "iter #{i} processing graph #{g}"
+3.times do |i|
+  puts "iter #{i}"
 
-  edge_betweeness = g.edge_betweeness
-  maximal_edges = edge_betweeness.maximal_edges
-  puts "maximal_edges=#{maximal_edges.inspect}"
-  
   candidate_solutions = Solutions.new
-  maximal_edges.edges.each do |candidate_edge_to_remove|
-    
-    g.remove_edge *(candidate_edge_to_remove)
-    
-    sizes = []
-    g.each_connected_component do |vertexs| 
-      sizes << vertexs.size
-      # note: to build a graph from this list can clone original
-      #       graph and then remove all vertices BUT these ones
+  should_continue = false
+  graphs.each do |graph|
+    puts "processing graph = #{graph}"
+    edge_betweeness = graph.edge_betweeness  
+    puts "is clique? #{edge_betweeness.is_clique?}"
+    if not edge_betweeness.is_clique?
+      puts "not a clique; considering candidate solutions"
+      graph.add_maximal_edges_to candidate_solutions
+      should_continue = true
     end
-    candidate_solutions.add candidate_edge_to_remove, sizes
-    puts "trialing candidate_edge_to_remove=#{candidate_edge_to_remove.inspect}, sizes=#{sizes.inspect}"
-    
-    g.add_edge *(candidate_edge_to_remove)
-    
   end
+  
+  if should_continue
+    puts "removing best candidate solution from #{candidate_solutions.best}"
+    graph, edge = candidate_solutions.best.graph, candidate_solutions.best.edge
+    graphs.delete graph
+    graph.remove_edge *edge
+    graphs += graph.break_into_connected_components
+  else
+    puts "FINAL final"
+    graphs.each { |g| puts g }
+    exit 0
+  end
+
+  puts "final"
+  graphs.each { |g| puts g.vertices.inspect }
+
+end
+
+=begin
+5.times do |i|
+
   
   puts "removing edge #{candidate_solutions.best}"
   g.remove_edge *candidate_solutions.best.edge
@@ -42,17 +54,17 @@ g = parse_from_stdin
   puts "breaking graph into it's decomposition"
   decomposition = g.break_into_connected_components
   puts decomposition.inspect
-=begin
   if decomposition.size > 1
     decomposition.each do |vertices|
       puts "decomposed #{g.clone_retaining_only_vertices vertices}"
     end
     exit 0
   end
-=end
+
 end
 
 puts "final"
 g.each_connected_component do |vertexs| 
   puts vertexs.inspect
 end
+=end
