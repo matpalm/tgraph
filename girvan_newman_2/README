@@ -1,11 +1,13 @@
 to draw graph of original graph
-bash> cat p97.edges | ./dotify.rb | neato -Tpng > p97.png
+bash> cd egs
+bash> cat p97.edges | ../dotify.rb | neato -Tpng > p97.png
 
 to decompose
-bash> decompose.rb < p97.edges | grep ^PART
+bash> decompose.rb < egs/p97.edges | grep ^PART
 
 to visualise decomposition
-bash> R --vanilla < dendro.r # hard coded to result of p97 for the time being
+bash> cd egs
+bash> R --vanilla < p97.dendrogram.r # hard coded to result of p97 for the time being
 
 
 TODOS
