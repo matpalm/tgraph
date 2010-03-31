@@ -1,4 +1,4 @@
-require 'core_extensions'
+require File.dirname(__FILE__) + '/core_extensions'
 
 Solution = Struct.new :graph, :edge, :sizes
 

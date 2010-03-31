@@ -2,17 +2,29 @@
 require 'rubygems'
 require 'rgl/adjacency'
 require 'rgl/connected_components'
-require 'edge_betweeness'
-require 'connected_components_extensions'
-require 'core_extensions'
-require 'parse'
-require 'solutions'
+require File.dirname(__FILE__) + '/edge_betweeness'
+require File.dirname(__FILE__) + '/connected_components_extensions'
+require File.dirname(__FILE__) + '/core_extensions'
+require File.dirname(__FILE__) + '/parse'
+require File.dirname(__FILE__) + '/solutions'
+
+def emit_partitions graphs
+  partitions = graphs.collect do |g| 
+    { 
+      :v => g.vertices.sort, 
+      :gid => g.gid,
+      :pgid => g.parent_gid
+    }
+  end
+  puts "PART #{partitions.inspect}"
+end
 
 initial_graph = parse_from_stdin
-puts "PARTITIONS #{[initial_graph.vertices.sort].inspect}"
+emit_partitions [initial_graph]
+
 graphs = initial_graph.break_into_connected_components
 
-100.times do |i|
+1000.times do |i|
   puts "iter #{i}"
 
   candidate_solutions = Solutions.new
@@ -40,10 +52,10 @@ graphs = initial_graph.break_into_connected_components
     exit 0
   end
  
+  emit_partitions graphs
 
-  partitions = graphs.collect { |g| g.vertices.sort }
-  partitions.sort! { |a,b| a.first <=> b.first }
-  puts "PARTITIONS #{partitions.inspect}"
+#  partitions.sort! { |a,b| a.first <=> b.first }
+ # puts "PARTITIONS #{partitions.inspect}"
 
 end
 

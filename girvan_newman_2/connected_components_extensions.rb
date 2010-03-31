@@ -5,6 +5,16 @@ require 'rgl/connected_components'
 module RGL
   class AdjacencyGraph
 
+    attr_writer :gid
+    attr_accessor :parent_gid
+
+    def gid
+      return @gid if @gid
+      @@gid_seq ||= 0  
+      @@gid_seq += 1
+      @gid = @@gid_seq
+    end
+
     def add_maximal_edges_to candidate_solutions
       maximal_edges = edge_betweeness.maximal_edges    
       puts "maximal_edges=#{maximal_edges.inspect}"
@@ -42,23 +52,12 @@ module RGL
       cloned.vertices.each do |vertex|
         cloned.remove_vertex vertex unless vertices.include? vertex
       end
-      cloned
-    end
 
-    def sizes_of_connected_components_if_edge_removed edge
-      raise "graph doesnt have edge #{edge.inspect}" unless has_edge? *edge
-      remove_edge *edge
-      
-      sizes = []
-      each_connected_component do |vertexs| 
-        sizes << vertexs.size
-        # note: to build a graph from this list can clone original
-        #       graph and then remove all vertices BUT these ones
-      end
-      puts "trialing candidate_edge_to_remove=#{edge.inspect}, sizes=#{sizes.inspect}"
-      
-      add_edge *edge
-      sizes
+      cloned.gid = nil
+      cloned.parent_gid = self.gid
+
+      puts "cloned #{gid} to make #{cloned.gid}"
+      cloned
     end
 
   end
