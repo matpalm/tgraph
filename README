@@ -1,2 +1,28 @@
-for now just the first wip checkin of the mining part, intended to fire and forget and run on the pvr
-for a few weeks. 
+some investigation on the twitter social graph
+
+/crawler - run in the background code to crawl following graph around a twitter user
+/girvan_newman_2 - implementation of girvan newman network decomposition
+
+
+-- convert from ids to normalised user, friend id (done so that first id1 is one of lesser value)
+> cd crawler
+> cat 100/ids | ./dump_users.rb > 100/following
+
+-- pluck out the ids pairs that were bidirectional (ie the ones that have frequency of 2)
+> cat 100/following | sort | uniq -c | perl -ne'next if /^\s+1/;split;print "$_[1]\t$_[2]\n"' > 100/friends
+
+-- reduces the set GREATLY
+> wc -l 100/{following,friends}
+ 142763 100/following
+    235 100/friends
+
+-- map from ids to names
+> cat 100/friends | ./to_names.rb 2>/dev/null > 100/names
+
+-- i can haz a graph
+> cat 100/names | ../dotify.rb | dot -Tpng > 100/graph.png
+
+-- i can haz decomposition
+> cat 100/friends | ../girvan_newman_2/decompose.rb > decomposition.out
+> grep ^PART decomposition.out
+
