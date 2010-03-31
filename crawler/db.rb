@@ -13,7 +13,7 @@ class Db
 		start = Time.now
 		result = @db.query query
 		total = Time.now - start
-		puts "#{query} took #{total}"
+#		puts "#{query} took #{total}"
 		result
 	end
 

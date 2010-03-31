@@ -4,7 +4,7 @@ require 'json'
 class User
 
 	def initialize tid, web_cache
-		@tid = tid
+		@tid = tid.to_i
 		@web_cache = web_cache
 	end
 
