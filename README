@@ -1,4 +1,5 @@
 some investigation on the twitter social graph
+see http://matpalm.com/blog/tag/e10
 
 /crawler - run in the background code to crawl following graph around a twitter user
 /girvan_newman_2 - implementation of girvan newman network decomposition
