@@ -1,0 +1,355 @@
+
+
+initial input
+ [{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1}, {:v=>[8, 9], :gid=>3, :pgid=>1}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1}, {:v=>[8, 9], :gid=>3, :pgid=>1}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1}, {:v=>[8, 9], :gid=>3, :pgid=>1}]
+ [{:v=>[8, 9], :gid=>3, :pgid=>1}, {:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2}, {:v=>[1, 2, 3], :gid=>5, :pgid=>2}]
+ [{:v=>[8, 9], :gid=>3, :pgid=>1}, {:v=>[1, 2, 3], :gid=>5, :pgid=>2}, {:v=>[5, 6, 7], :gid=>6, :pgid=>4}, {:v=>[4], :gid=>7, :pgid=>4}]
+
+reverse input so last combination at the bottom
+
+ [{:v=>[8, 9], :gid=>3, :pgid=>1}, {:v=>[1, 2, 3], :gid=>5, :pgid=>2}, {:v=>[5, 6, 7], :gid=>6, :pgid=>4}, {:v=>[4], :gid=>7, :pgid=>4}]
+ [{:v=>[8, 9], :gid=>3, :pgid=>1}, {:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2}, {:v=>[1, 2, 3], :gid=>5, :pgid=>2}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1}, {:v=>[8, 9], :gid=>3, :pgid=>1}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1}, {:v=>[8, 9], :gid=>3, :pgid=>1}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1}, {:v=>[8, 9], :gid=>3, :pgid=>1}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil}]
+
+inject height into each group based on what line they are on
+
+ [{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1}, {:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1}, {:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1}, {:v=>[4], :gid=>7, :pgid=>4, :h=>1}]
+ [{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>2}, {:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, {:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>2}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>3}, {:v=>[8, 9], :gid=>3, :pgid=>1, :h=>3}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>4}, {:v=>[8, 9], :gid=>3, :pgid=>1, :h=>4}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}, {:v=>[8, 9], :gid=>3, :pgid=>1, :h=>5}]
+ [{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}]
+
+retain all from first line flattened
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1},
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1},
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1}
+
+keep others only based on their HIGHEST values for each gdsame order, keeping only the HIGHEST version for each gid
+
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+process in order, 
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1} <--
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1},
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1}
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+h=1 and clique so emit special
+EMIT ROW [-8,-9] #1
+EMIT HEIGHT 1
+store row 1
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1, :row=>1} 
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1}, <--
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1},
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1}
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+h=1 and clique so emit special
+EMIT ROW [-1,-2] #2
+EMIT ROW [2,-3]  #3
+EMIT HEIGHT 1,1
+store row 3
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1, :row=>1} 
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1, :row=>3},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1}, <--
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1}
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+h=1 and clique so emit special
+EMIT ROW [-5,-6] #4
+EMIT ROW [4,-7]  #5
+EMIT HEIGHT 1,1
+store row 5
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1, :row=>1} 
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1, :row=>3},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1, :row=>5}, 
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1} <--
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+h=1 and single vertice so just set row = -vertex
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1, :row=>1} 
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1, :row=>3},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1, :row=>5}, 
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1, :row=>-4} 
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2}, <--
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5}
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+h!=1 so combine children
+
+EMIT ROW [-4,5] #6
+EMIT HEIGHT 2
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1, :row=>1} 
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1, :row=>3},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1, :row=>5}, 
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1, :row=>-4} 
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2, :row=> 6}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5} <--
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6}
+
+h!=1 so combine children
+
+EMIT ROW [6,3] #7
+EMIT HEIGHT 5
+
+{:v=>[8, 9], :gid=>3, :pgid=>1, :h=>1, :row=>1} 
+{:v=>[1, 2, 3], :gid=>5, :pgid=>2, :h=>1, :row=>3},
+{:v=>[5, 6, 7], :gid=>6, :pgid=>4, :h=>1, :row=>5}, 
+{:v=>[4], :gid=>7, :pgid=>4, :h=>1, :row=>-4} 
+{:v=>[4, 5, 6, 7], :gid=>4, :pgid=>2, :h=>2, :row=>6}, 
+{:v=>[1, 2, 3, 4, 5, 6, 7], :gid=>2, :pgid=>1, :h=>5, :row=>7} 
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9], :gid=>1, :pgid=>nil, :h=>6} <--
+
+h!=1 so combine children
+
+EMIT ROW [7,1]
+EMIT HEIGHT 6
+
+DONE
+
+
+
+
+
+
+
+
+
+
+
+run over keeping only the hei
+
+break into two lists
+
+--first_line
+{:v=>[9], :gid=>5, :pgid=>3, }, 
+{:v=>[4], :gid=>7, :pgid=>2, }, 
+{:v=>[12], :gid=>9, :pgid=>4, }, 
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, }, 
+{:v=>[3, 6], :gid=>11, :pgid=>6, }, 
+{:v=>[11], :gid=>12, :pgid=>8, }, 
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8}
+
+--other_lines, in order, but ignoring entries seen before
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4},
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2}],
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3},
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1},
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1},
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil},
+
+process first_line entries
+
+{:v=>[9], :gid=>5, :pgid=>3, }, <---
+{:v=>[4], :gid=>7, :pgid=>2, }, 
+{:v=>[12], :gid=>9, :pgid=>4, }, 
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, }, 
+{:v=>[3, 6], :gid=>11, :pgid=>6, }, 
+{:v=>[11], :gid=>12, :pgid=>8, }, 
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, },
+
+single value so just save row as -vertice
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9}
+{:v=>[4], :gid=>7, :pgid=>2, } <-- 
+{:v=>[12], :gid=>9, :pgid=>4, }, 
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, }, 
+{:v=>[3, 6], :gid=>11, :pgid=>6, }, 
+{:v=>[11], :gid=>12, :pgid=>8, }, 
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, },
+
+single value so just save row as -v
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4}
+{:v=>[12], :gid=>9, :pgid=>4, } <--
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, }, 
+{:v=>[3, 6], :gid=>11, :pgid=>6, }, 
+{:v=>[11], :gid=>12, :pgid=>8, }, 
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, },
+
+single value so just save row as -v
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, }, <---
+{:v=>[3, 6], :gid=>11, :pgid=>6, }, 
+{:v=>[11], :gid=>12, :pgid=>8, }, 
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, },
+
+clique so emit special combos
+EMIT ROW [-1,-2] (#1)
+EMIT ROW [1,-5] (#2)
+EMIT HEIGHT 1, 1 # first row
+set row = 2
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, },  <--
+{:v=>[11], :gid=>12, :pgid=>8, }, 
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, },
+
+clique so emit special combos
+EMIT ROW [-3,-6] (#3)
+EMIT HEIGHT 1 # first row
+set row = 3
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, }, <--
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, },
+
+single value so just save row as -v
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, }, <--
+
+clique so emit special combos
+EMIT ROW [-7,-8] #4
+EMIT ROW [4,-10] #5
+EMIT HEIGHT 1,1 # first row
+set row = 5
+
+move onto other_lines, emit row as rows of children, inc height (starting at 2) for each emit
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, :h=1, :row=>5>}, 
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4} <--
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2}],
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3},
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1},
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1},
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil},
+
+EMIT ROW [5, -11] #6
+EMIT HEIGHT 2
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, :h=1, :row=>5>}, 
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4, :row=>6}
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2}, <--
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3},
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1},
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1},
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil},
+
+EMIT ROW [2,3] #7
+EMIT HEIGHT 3
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, :h=1, :row=>5>}, 
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4, :row=>6}
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2, :row=>7}, 
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3}, <--
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1},
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1},
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil},
+
+EMIT ROW [6,-12] #8
+EMIT HEIGHT 4
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, :h=1, :row=>5>}, 
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4, :row=>6}
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2, :row=>7}, 
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3, :row=>8}, 
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1}, <--
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1},
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil},
+
+EMIT ROW [7, -4] #9
+EMIT HEIGHT 5
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, :h=1, :row=>5>}, 
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4, :row=>6}
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2, :row=>7}, 
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3, :row=>8}, 
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1, :row=>9}, 
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1 }, <--
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil},
+
+EMIT ROW [8, -9] #10
+EMIT HEIGHT 6
+
+{:v=>[9], :gid=>5, :pgid=>3, , :row=>-9},
+{:v=>[4], :gid=>7, :pgid=>2, , :row=>-4},
+{:v=>[12], :gid=>9, :pgid=>4, , :row=>-12},
+{:v=>[1, 2, 5], :gid=>10, :pgid=>6, , :row=>2},
+{:v=>[3, 6], :gid=>11, :pgid=>6, , :row=>3}
+{:v=>[11], :gid=>12, :pgid=>8, , :row=>-11},
+{:v=>[7, 8, 10], :gid=>13, :pgid=>8, :h=1, :row=>5>}, 
+{:v=>[7, 8, 10, 11], :gid=>8, :pgid=>4, :row=>6}
+{:v=>[1, 2, 3, 5, 6], :gid=>6, :pgid=>2, :row=>7}, 
+{:v=>[7, 8, 10, 11, 12], :gid=>4, :pgid=>3, :row=>8}, 
+{:v=>[1, 2, 3, 4, 5, 6], :gid=>2, :pgid=>1, :row=>9}, 
+{:v=>[7, 8, 9, 10, 11, 12], :gid=>3, :pgid=>1, :row=>10 }, 
+{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], :gid=>1, :pgid=>nil}, <--
+
+EMIT ROW [ 10, 9 ] #11
+EMIT HEIGHT 7
+
+
+

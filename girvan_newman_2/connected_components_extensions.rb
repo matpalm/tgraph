@@ -16,10 +16,10 @@ module RGL
     end
 
     def add_maximal_edges_to candidate_solutions
-      maximal_edges = edge_betweeness.maximal_edges    
+      maximal_edges = edge_betweeness.maximal_edges
       puts "maximal_edges=#{maximal_edges.inspect}"
       
-      maximal_edges.edges.each do |candidate_edge_to_remove|
+      maximal_edges.edges.shuffle.each do |candidate_edge_to_remove|
         puts "trialing candidate_edge_to_remove=#{candidate_edge_to_remove.inspect}"
         remove_edge *(candidate_edge_to_remove)
         
@@ -35,7 +35,7 @@ module RGL
         add_edge *(candidate_edge_to_remove)
       end
 
-      puts "best edge to remove from candidates is #{candidate_solutions.best}"
+      puts "best edge to remove from candidates is gid=#{candidate_solutions.best.graph.gid} edge=#{candidate_solutions.best.edge.inspect}"
     end
       
     def break_into_connected_components
@@ -47,9 +47,10 @@ module RGL
     end
 
     def clone_retaining_only vertices
+      return self if vertices.sort == self.vertices.sort
+ 
       cloned = self.clone
-      cloned.edge_betweeness = nil
-      cloned.vertices.each do |vertex|
+       cloned.vertices.each do |vertex|
         cloned.remove_vertex vertex unless vertices.include? vertex
       end
 

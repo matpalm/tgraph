@@ -23,6 +23,7 @@ some investigation on the twitter social graph
 > cat 100/names | ../dotify.rb | dot -Tpng > 100/graph.png
 
 -- i can haz decomposition
-> cat 100/friends | ../girvan_newman_2/decompose.rb > decomposition.out
+> cd girvan_newman_2
+> cat ../crawler/100/friends | decompose.rb > decomposition.out
 > grep ^PART decomposition.out
 

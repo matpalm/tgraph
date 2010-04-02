@@ -2,11 +2,9 @@
 require 'rubygems'
 require 'rgl/adjacency'
 require 'rgl/connected_components'
-require File.dirname(__FILE__) + '/edge_betweeness'
-require File.dirname(__FILE__) + '/connected_components_extensions'
-require File.dirname(__FILE__) + '/core_extensions'
-require File.dirname(__FILE__) + '/parse'
-require File.dirname(__FILE__) + '/solutions'
+
+['edge_betweeness','connected_components_extensions','core_extensions',
+ 'parse','solutions'].each { |f| require "#{File.dirname(__FILE__)}/#{f}" }
 
 def emit_partitions graphs
   partitions = graphs.collect do |g| 
@@ -23,6 +21,7 @@ initial_graph = parse_from_stdin
 emit_partitions [initial_graph]
 
 graphs = initial_graph.break_into_connected_components
+emit_partitions graphs if graphs.size > 1
 
 1000.times do |i|
   puts "iter #{i}"
@@ -30,21 +29,24 @@ graphs = initial_graph.break_into_connected_components
   candidate_solutions = Solutions.new
   should_continue = false
   graphs.each do |graph|
-    puts "processing graph = #{graph}"
+    puts "processing graph gid=#{graph.gid} #{graph.vertices.sort.inspect}"
     edge_betweeness = graph.edge_betweeness  
-    puts "is clique? #{edge_betweeness.is_clique?}"
     if not edge_betweeness.is_clique?
       puts "not a clique; considering candidate solutions"
       graph.add_maximal_edges_to candidate_solutions
       should_continue = true
+    else
+      puts "is a clique; ignore"
     end
+    
   end
   
   if should_continue
-    puts "removing best candidate solution from #{candidate_solutions.best}"
+    puts "removing best candidate solution from gid=#{candidate_solutions.best.graph.gid}"
     graph, edge = candidate_solutions.best.graph, candidate_solutions.best.edge
     graphs.delete graph
     graph.remove_edge *edge
+    graph.edge_betweeness = nil
     graphs += graph.break_into_connected_components
   else
     puts "FINAL final"
