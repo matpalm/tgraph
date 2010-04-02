@@ -3,7 +3,6 @@ some investigation on the twitter social graph
 /crawler - run in the background code to crawl following graph around a twitter user
 /girvan_newman_2 - implementation of girvan newman network decomposition
 
-
 -- convert from ids to normalised user, friend id (done so that first id1 is one of lesser value)
 > cd crawler
 > cat 100/ids | ./dump_users.rb > 100/following
@@ -19,11 +18,18 @@ some investigation on the twitter social graph
 -- map from ids to names
 > cat 100/friends | ./to_names.rb 2>/dev/null > 100/names
 
--- i can haz a graph
-> cat 100/names | ../dotify.rb | dot -Tpng > 100/graph.png
+-- i can haz a network graph
+> cat 100/names | ../dotify.rb | neato -Tpng > 100/graph.png
 
--- i can haz decomposition
+-- i can haz decomposition (almost!!!)
 > cd girvan_newman_2
-> cat ../crawler/100/friends | decompose.rb > decomposition.out
-> grep ^PART decomposition.out
+#> cat ../crawler/100/friends | ./decompose.rb > 100.friends.decomposition.json
+#> cat 100.friends.decomposition.json | ./dendrogramer.rb 100.friends > 100.generate_dendrogram.r
+#> R --vanilla < 100.generate_dendrogram.r
+
+> cat egs/wiki_community.edges | ./decompose.rb > egs/wiki_community.decomposition.json
+> cat egs/wiki_community.decomposition.json | ./dendrogramer.rb wiki_community.dendrogram > egs/wiki_community.dendrogram.r
+> R --vanilla < egs/wiki_community.dendrogram.r
+> eog wiki_community.dendrogram.jpg
+
 

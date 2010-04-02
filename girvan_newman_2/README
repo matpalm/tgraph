@@ -1,20 +1,9 @@
--- to draw graph of original graph
-> cd egs
-> cat p97.edges | ../../dotify.rb | neato -Tpng > p97.png
+impl of girvan newman network decomposition
+edge betweeness implemented using stochstatic all shortest paths
 
--- to decompose
-> ./decompose.rb < egs/p97.edges | grep ^PART
+see parent README for notes on using it
 
--- to visualise decomposition
-> cd egs
-> R --vanilla < p97.dendrogram.r # hard coded to result of p97 for the time being
-
-WIP
-
--- to generate dendrogram
-> ./dendrogramer.rb 
-
-TODOS
+TODOS:
 
 stocastic g-n (p98) using a few random points to calc betweenness rather than all vertices
 have to run a number of times but each time is a vote towards what community so is

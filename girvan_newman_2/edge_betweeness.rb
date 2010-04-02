@@ -10,7 +10,6 @@ class Hash
   def maximal_edges
     max_edges = []
     max_freq = -1 # bootstrap
-    puts "edge_betweeness=#{self.inspect}"
     self.each do |edge, freq|
       next if freq < max_freq
       max_edges.clear if freq > max_freq
@@ -47,7 +46,6 @@ module RGL
       visited = Set.new
       shortest_path_found = Set.new
       todo = [ vertex1 ]
-      #puts "shortestpath from #{vertex1}"
       while not todo.empty? do
         #puts "\ntodo = #{todo.inspect}"
         #puts "visited = #{visited.inspect}"

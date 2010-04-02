@@ -17,10 +17,7 @@ module RGL
 
     def add_maximal_edges_to candidate_solutions
       maximal_edges = edge_betweeness.maximal_edges
-      puts "maximal_edges=#{maximal_edges.inspect}"
-      
       maximal_edges.edges.shuffle.each do |candidate_edge_to_remove|
-        puts "trialing candidate_edge_to_remove=#{candidate_edge_to_remove.inspect}"
         remove_edge *(candidate_edge_to_remove)
         
         sizes = []
@@ -29,13 +26,10 @@ module RGL
           # note: to build a graph from this list can clone original
           #       graph and then remove all vertices BUT these ones
         end
-        puts "removal of candidate edge results in sizes=#{sizes.inspect}"
         candidate_solutions.consider_candidate self, candidate_edge_to_remove, sizes
         
         add_edge *(candidate_edge_to_remove)
       end
-
-      puts "best edge to remove from candidates is gid=#{candidate_solutions.best.graph.gid} edge=#{candidate_solutions.best.edge.inspect}"
     end
       
     def break_into_connected_components
@@ -57,7 +51,6 @@ module RGL
       cloned.gid = nil
       cloned.parent_gid = self.gid
 
-      puts "cloned #{gid} to make #{cloned.gid}"
       cloned
     end
 
