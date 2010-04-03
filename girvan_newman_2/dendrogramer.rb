@@ -2,15 +2,15 @@
 require 'set'
 require 'rubygems'
 require 'json'
-require 'ruby-debug'
 
 Graph = Struct.new :v, :gid, :pgid, :row, :height
 
 class Dendrogramer
 
-  def initialize
+  def initialize node_names
     @r_matrix = []
     @r_heights = []
+    @node_names = node_names
   end
 
   def process raw_inputs
@@ -97,7 +97,6 @@ class Dendrogramer
 
   def process_as_first_row_clique clique
     vertices = clique.v.clone
-#    puts "processing clique #{clique.inspect}"
     a,b = vertices.shift, vertices.shift
     @r_matrix << [ -a, -b ]       
     @r_heights << 1 
@@ -109,8 +108,6 @@ class Dendrogramer
     end
     
     clique.row = @r_matrix.size
-#    puts "rows now #{@r_matrix.inspect}"
-#    puts "clique #{clique.inspect}"
   end
 
   def children_of parent
@@ -122,7 +119,6 @@ class Dendrogramer
   end
   
   def dump_info
-    puts
     @graphs_list.each { |g| puts g.inspect }
     puts "r_matrix #{@r_matrix.inspect}"
     puts "r_heights #{@r_heights.inspect}"
@@ -133,7 +129,8 @@ class Dendrogramer
     puts "a$merge <- matrix(c(#{@r_matrix.flatten.join ','}), nc=2, byrow=TRUE)"
     puts "a$height <- c(#{@r_heights.join ','})"
     puts "a$order <- 1:#{@r_heights.size+1}"
-    puts "a$labels <- 1:#{@r_heights.size+1}"
+    #puts "a$labels <- 1:#{@r_heights.size+1}"
+    puts "a$labels <- c(\"#{@node_names.join('","')}\")"
     puts 'class(a) <- "hclust"'
     puts "jpeg(\"#{ARGV.first || 'dendrogram'}.jpg\", width=400, height=400)"
     puts 'plot(as.dendrogram(a))'
@@ -142,27 +139,9 @@ class Dendrogramer
 
 end
 
-=begin
-input = [
-         [{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], :gid=>1, :pgid=>nil}],
-         [{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], :gid=>1, :pgid=>nil}],
-         [{:v=>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], :gid=>1, :pgid=>nil}],
-         [{:v=>[3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], :gid=>2, :pgid=>1}, {:v=>[1, 2, 4], :gid=>3, :pgid=>1}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], :gid=>2, :pgid=>1}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], :gid=>2, :pgid=>1}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[3, 5, 6, 8, 10, 11, 12, 13, 14], :gid=>4, :pgid=>2}, {:v=>[7, 9], :gid=>5, :pgid=>2}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8, 10, 11, 12, 13, 14], :gid=>4, :pgid=>2}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8, 10, 11, 12, 13, 14], :gid=>4, :pgid=>2}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8], :gid=>6, :pgid=>4}, {:v=>[10, 11, 12, 13, 14], :gid=>7, :pgid=>4}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8], :gid=>6, :pgid=>4}, {:v=>[10, 11, 12, 13, 14], :gid=>7, :pgid=>4}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8], :gid=>6, :pgid=>4}, {:v=>[10, 11, 12, 13, 14], :gid=>7, :pgid=>4}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8], :gid=>6, :pgid=>4}, {:v=>[11], :gid=>8, :pgid=>7}, {:v=>[10, 12, 13, 14], :gid=>9, :pgid=>7}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8], :gid=>6, :pgid=>4}, {:v=>[11], :gid=>8, :pgid=>7}, {:v=>[10, 12, 13, 14], :gid=>9, :pgid=>7}],
-         [{:v=>[1, 2, 4], :gid=>3, :pgid=>1}, {:v=>[7, 9], :gid=>5, :pgid=>2}, {:v=>[3, 5, 6, 8], :gid=>6, :pgid=>4}, {:v=>[11], :gid=>8, :pgid=>7}, {:v=>[10, 12, 13], :gid=>10, :pgid=>9}, {:v=>[14], :gid=>11, :pgid=>9}]
-]
-=end
-
 input = JSON::parse(STDIN.readline)
-Dendrogramer.new.process input
+partitions = input['partitions']
+node_names = input['node_names']
+Dendrogramer.new(node_names).process partitions
 
 

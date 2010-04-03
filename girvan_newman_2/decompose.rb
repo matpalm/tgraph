@@ -7,19 +7,19 @@ require 'json'
 ['edge_betweeness','connected_components_extensions','core_extensions',
  'parse','solutions'].each { |f| require "#{File.dirname(__FILE__)}/#{f}" }
 
-@output = []
+@partitions = []
 def emit_partitions graphs
-  partitions = graphs.collect do |g| 
+  partition = graphs.collect do |g| 
     { 
       :v => g.vertices.sort, 
       :gid => g.gid,
       :pgid => g.parent_gid
     }
   end
-  @output << partitions.clone
+  @partitions << partition
 end
 
-initial_graph = parse_from_stdin
+initial_graph, node_names = Parser.new.parse_from_stdin
 emit_partitions [initial_graph]
 
 graphs = initial_graph.break_into_connected_components
@@ -44,7 +44,7 @@ emit_partitions graphs if graphs.size > 1
     graph.edge_betweeness = nil
     graphs += graph.break_into_connected_components
   else
-    puts @output.to_json
+    puts({ :partitions => @partitions, :node_names => node_names}.to_json)
     exit 0
   end
  
