@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
-require 'web_cache'
-require 'db'
-require 'user'
+['web_cache','db','user'].each { |f| require "#{File.dirname(__FILE__)}/#{f}" }
 
 web_cache = WebCache.new
 id_to_name = {}

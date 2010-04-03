@@ -1,8 +1,7 @@
 require 'fileutils'
-require 'curl'
-require 'rate_limiter'
+['curl','rate_limiter'].each { |f| require "#{File.dirname(__FILE__)}/#{f}" }
 
-WEB_CACHE_DIR = 'cache'
+WEB_CACHE_DIR = "#{File.dirname(__FILE__)}/cache"
 HASH_BUCKETS = 20
 
 class TwitterInfo

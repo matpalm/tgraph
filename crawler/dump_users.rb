@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'web_cache'
-require 'db'
-require 'user'
 require 'set'
+['web_cache','db','user'].each { |f| require "#{File.dirname(__FILE__)}/#{f}" }
 
 web_cache = WebCache.new
 db = Db.new
