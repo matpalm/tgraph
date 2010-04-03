@@ -13,7 +13,7 @@ class RateLimiter
     recheck_with_twitter if @recheck_required		
     if @allowed > 0
       @allowed -=1
-      puts "RATELIMIT: allowed now #{@allowed}"
+      STDERR.puts "RATELIMIT: allowed now #{@allowed}"
     else
       block_until_reset_time
       @recheck_required = true
@@ -22,7 +22,7 @@ class RateLimiter
   end
   
   def recheck_with_twitter
-    puts "RATELIMIT: recheck_with_twitter"
+    STDERR.puts "RATELIMIT: recheck_with_twitter"
     while true
       begin
         json = curl 'http://twitter.com/account/rate_limit_status.json'

@@ -18,7 +18,7 @@ class TwitterInfo
   end
   
   def download
-    puts "cache miss for #{@fetch_url}"		
+    STDERR.puts "cache miss for #{@fetch_url}"		
     @rate_limiter.checkpoint
     curl @fetch_url, @cache_filename
     if !File.exists? @cache_filename
@@ -27,7 +27,7 @@ class TwitterInfo
       download
     end
   end
-
+  
 end
 
 class WebCache

@@ -132,7 +132,7 @@ class Dendrogramer
     #puts "a$labels <- 1:#{@r_heights.size+1}"
     puts "a$labels <- c(\"#{@node_names.join('","')}\")"
     puts 'class(a) <- "hclust"'
-    puts "jpeg(\"#{ARGV.first || 'dendrogram'}.jpg\", width=400, height=400)"
+    puts "jpeg(\"#{ARGV.first || 'dendrogram'}.jpg\", width=1500, height=1000)"
     puts 'plot(as.dendrogram(a))'
     puts 'dev.off()'    
   end

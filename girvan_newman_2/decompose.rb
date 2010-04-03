@@ -25,7 +25,9 @@ emit_partitions [initial_graph]
 graphs = initial_graph.break_into_connected_components
 emit_partitions graphs if graphs.size > 1
 
-1000.times do |i|
+100000.times do |i|
+  STDERR.puts "i=#{i} #graphs=#{graphs.size}"
+
   candidate_solutions = Solutions.new
   should_continue = false
   graphs.each do |graph|
