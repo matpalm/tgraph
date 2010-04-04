@@ -4,6 +4,7 @@ see http://matpalm.com/blog/tag/e10
 /crawler - run in the background code to crawl following graph around a twitter user
 /girvan_newman_2 - implementation of girvan newman network decomposition
 
+> cd crawler
 > mkdir 100 # 100 users around me
 > cd 100
 > magically-get-ids > ids
