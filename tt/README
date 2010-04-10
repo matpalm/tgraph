@@ -1,0 +1,23 @@
+
+# take 150k latest messages
+tail -150000 pm.01.csv | ./just_sender_receiver.pl > pm.150k
+
+# run pig script to convert to bidirectional with weights
+> pig -x local -f extract_ids.pig -param input=pm.150k -param output=pm.bi.150k
+> wc -l pm.bi.150k
+15974
+
+# discover biggest connected components
+> cat pm.bi.150k | ./connected_components_sizes.rb | sort -n | tail
+6
+6
+6
+7
+7
+8
+8
+8
+30
+9944
+
+# extract just ids for latest component
