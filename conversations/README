@@ -1,0 +1,3 @@
+$ ruby crawl.rb
+
+#todo: change to rest api so can use whitelisting
