@@ -1,3 +1,17 @@
-$ ruby crawl.rb
+$ ruby crawl.rb > progress.log 2> mentions.tsv 
 
-#todo: change to rest api so can use whitelisting
+let run until bored
+~12hours gives 300e3 records in mentions.tsv (8e3 ppl processed)
+
+$ pig -x local -p input=mentions.tsv -p output=conversations.tsv extract_conversations.pig
+
+takes 14s to 160e3 conversations
+
+
+
+todo
+- change to rest api so can use whitelisting
+
+problems
+- rate limiting means tweets gathered later and quite different in time to the ones first collected, not good for conversations
+- search api doesnt return very many results per person, api could dig deeper in time 

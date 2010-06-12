@@ -1,1 +1,5 @@
 db
+pig*log
+conversations.tsv
+mentions.tsv
+progress.log
